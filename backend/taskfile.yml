@@ -1,0 +1,66 @@
+version: "3"
+
+includes:
+  common:
+    taskfile: ../taskfile.yml
+    internal: true
+    vars:
+      SRC_FOLDER: src
+      BUILD_NAME: target
+      IMAGE_NAME: backend-rs
+      CONTAINER_NAME: backend-rs
+      CONTAINER_OPTS: -p 8080:8080
+
+tasks:
+  build:
+    desc: Build Docker image.
+    cmds:
+      - task: common:build
+
+  run:
+    desc: Run Docker container.
+    cmds:
+      - task: common:run
+        vars:
+          CONTAINER_ARGS: "/backend"
+
+  delete:
+    desc: Delete Docker container.
+    cmds:
+      - task: common:delete
+
+  clean:
+    desc: Delete Docker container and image.
+    cmds:
+      - task: common:clean
+
+  lint:
+    desc: Run code quality checking.
+    cmds:
+      # - task: common:lint-dockerfile
+      - task: common:lint
+
+  format:
+    desc: Format source files.
+    cmds:
+      - task: common:format
+
+  test:
+    desc: Run unit tests.
+    cmds:
+      - task: common:test
+
+  check:
+    desc: Run format, lint, test and security.
+    cmds:
+      - task: common:check
+
+  localbuild:
+    desc: Build the binary on the host.
+    cmds:
+      - task: common:localbuild
+
+  localrun:
+    desc: Run the binary on the host.
+    cmds:
+      - task: common:localrun

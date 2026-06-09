@@ -1,0 +1,79 @@
+version: "3"
+
+vars:
+  DOCKER_NETWORK: dev
+
+tasks:
+  build:
+    cmds:
+      - docker build
+        -f Dockerfile
+        -t {{.IMAGE_NAME}}:dev ../../
+
+  run:
+    cmds:
+      - task: build
+      - task: delete
+      - docker run -d --net {{.DOCKER_NETWORK}} {{.CLI_ARGS}} {{.CONTAINER_OPTS}}
+        --name {{.CONTAINER_NAME}} {{.IMAGE_NAME}}:dev {{.CONTAINER_ARGS}}
+    preconditions:
+      - command -v docker
+
+  delete:
+    cmds:
+      - cmd: docker kill $(docker ps -a -q --filter "name={{.CONTAINER_NAME}}")
+        ignore_error: true
+      - cmd: docker rm $(docker ps -a -q --filter "name={{.CONTAINER_NAME}}")
+        ignore_error: true
+    status:
+      - docker ps -a | grep -c "{{.CONTAINER_NAME}}" && false
+    preconditions:
+      - command -v docker
+
+  clean:
+    cmds:
+      - cmd: rm -r
+          ".task"
+          "{{.SRC_FOLDER}}/{{.BUILD_NAME}}"
+        ignore_error: true
+      - task: delete
+      - cmd: docker rmi {{.IMAGE_NAME}}:dev
+        ignore_error: true
+    preconditions:
+      - command -v docker
+
+  lint:
+    cmds:
+      - cargo fix --allow-dirty
+      - cargo check
+
+  lint-dockerfile:
+    cmds:
+      - docker run --rm -i hadolint/hadolint:v2.12.1-beta-alpine < ./Dockerfile
+    preconditions:
+      - test -f ./Dockerfile
+
+
+  format:
+    cmds:
+      - cargo fix --allow-dirty
+
+  test:
+    cmds:
+      - cargo test
+
+  check:
+    cmds:
+      - cargo fix --allow-dirty
+      - cargo check
+      - cargo test
+
+  localbuild:
+    cmds:
+      - cargo build
+
+  localrun:
+    dir: "{{.SRC_FOLDER}}"
+    cmds:
+      - task: localbuild
+      - cargo run

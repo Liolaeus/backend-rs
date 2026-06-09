@@ -1,0 +1,41 @@
+version: "3"
+
+includes:
+  common:
+    taskfile: ../taskfile.yml
+    internal: true
+    vars:
+      BUILD_NAME: database
+      IMAGE_NAME: database
+      CONTAINER_NAME: database
+      CONTAINER_OPTS:
+        -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=backend -p 5432:5432
+        -v ${PWD}/configuration/etc/postgresql:/etc/postgresql
+        # -v ${PWD}/certs:/etc/postgresql/certs
+      CONTAINER_ARGS: postgres -c config_file=/etc/postgresql/postgresql.conf
+
+tasks:
+  build:
+    desc: Build Docker image.
+    cmds:
+      - task: common:build
+
+  run:
+    desc: Run Docker container.
+    cmds:
+      - task: common:run
+
+  delete:
+    desc: Delete Docker container.
+    cmds:
+      - task: common:delete
+
+  clean:
+    desc: Delete Docker container and image.
+    cmds:
+      - task: common:clean
+
+  lint:
+    desc: Run code quality checking.
+    cmds:
+      - task: common:lint-dockerfile

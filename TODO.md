@@ -1,0 +1,11 @@
+- [] logging
+    - [] logging modes
+- [x] dockerfiles
+- [x] taskfile
+- [] postgres
+    - [] models + refacto
+- [] swagger doc
+- [] sessions
+- [] shop + sessions
+- [] clap args ?
+- [] update tfs
