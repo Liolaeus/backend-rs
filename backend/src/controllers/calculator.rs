@@ -1,4 +1,3 @@
-use std::sync::Arc;
 
 use axum::{Router, extract::Query, routing::get};
 
@@ -7,10 +6,10 @@ use crate::{
         calculator::{ExpError, evaluate_expression},
         state::AppState,
     },
-    http::dto::calculator::CalcQuery,
+    controllers::dto::calculator::CalcQuery,
 };
 
-pub fn calc_routes() -> Router<Arc<AppState>> {
+pub fn calc_routes() -> Router<AppState> {
     Router::new().route("/calculatrice", get(calculate))
 }
 

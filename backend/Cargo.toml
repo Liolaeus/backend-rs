@@ -7,6 +7,8 @@ edition = "2024"
 strip = true
 
 [dependencies]
+diesel = { version = "2.2.0", features = ["postgres"] }
+
 axum = "0.8.8"
 serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.49.0", features = ["full"] }
@@ -21,3 +23,5 @@ chrono = "0.4.44"
 sha256 = "1.6.0"
 tryphon = "0.2.0"
 rstest = "0.26.1"
+deadpool-diesel = { version = "0.6.1", features = ["postgres"] }
+diesel_migrations = "2.3.2"

@@ -7,7 +7,7 @@ use rstest::rstest;
 
 use crate::{
     domain::state::{Stock, destock},
-    http::errors::APIError,
+    controllers::errors::APIError,
 };
 
 #[rstest]

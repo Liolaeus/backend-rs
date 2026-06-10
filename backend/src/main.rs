@@ -1,6 +1,8 @@
 mod config;
+mod controllers;
 mod domain;
-mod http;
+mod models;
+mod schema;
 mod server;
 mod tests;
 

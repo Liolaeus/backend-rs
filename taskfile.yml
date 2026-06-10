@@ -8,10 +8,11 @@ tasks:
     cmds:
       - docker build
         -f Dockerfile
-        -t {{.IMAGE_NAME}}:dev ../../
+        -t {{.IMAGE_NAME}}:dev ./
 
   run:
     cmds:
+      - pwd
       - task: build
       - task: delete
       - docker run -d --net {{.DOCKER_NETWORK}} {{.CLI_ARGS}} {{.CONTAINER_OPTS}}
@@ -20,6 +21,7 @@ tasks:
       - command -v docker
 
   delete:
+    decs: kill and remove running container
     cmds:
       - cmd: docker kill $(docker ps -a -q --filter "name={{.CONTAINER_NAME}}")
         ignore_error: true
@@ -42,6 +44,14 @@ tasks:
     preconditions:
       - command -v docker
 
+  db:
+    cmds:
+      - task --dir ./database run
+
+  back:
+    cmds:
+      - task --dir ./backend localrun
+
   lint:
     cmds:
       - cargo fix --allow-dirty
@@ -52,7 +62,6 @@ tasks:
       - docker run --rm -i hadolint/hadolint:v2.12.1-beta-alpine < ./Dockerfile
     preconditions:
       - test -f ./Dockerfile
-
 
   format:
     cmds:
