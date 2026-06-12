@@ -1,20 +1,26 @@
-
+use argon2::{
+    Argon2, PasswordHasher,
+    password_hash::{SaltString, rand_core::OsRng},
+};
 use axum::{
     Json, Router,
     extract::State,
     http::HeaderMap,
     routing::{post, put},
 };
+use diesel::result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError};
+use validator::Validate;
 
 use crate::{
-    domain::state::AppState,
     controllers::{
         dto::{
             GenericAPIResponse,
-            users::{AuthUserQuery, UserWrite},
+            users::{AuthUserQuery, UserRead, UserWrite},
         },
         errors::APIError,
     },
+    domain::state::AppState,
+    models::users::{DBError, UserDB, create_user},
 };
 
 pub fn auth_routes() -> Router<AppState> {
@@ -24,27 +30,43 @@ pub fn auth_routes() -> Router<AppState> {
 }
 
 async fn register(
-    State(_state): State<AppState>,
-    Json(_body): Json<UserWrite>,
-) -> Result<Json<GenericAPIResponse>, APIError> {
-    Err(APIError::BadRequest)
-    // let mut users = state.get_users_map()?;
+    State(state): State<AppState>,
+    Json(body): Json<UserWrite>,
+) -> Result<Json<UserRead>, APIError> {
+    if let Err(e) = body.validate() {
+        return Err(APIError::BadRequestMsg(e.to_string()));
+    }
 
-    // if let Err(e) = body.validate() {
-    //     return Err(APIError::BadRequestMsg(e.to_string()));
-    // }
+    let res = create_user(
+        &state.db,
+        UserDB {
+            name: body.name,
+            email: body.email,
+            password_hash: hash_password(body.password),
+        },
+    )
+    .await;
 
-    // if users.contains_key(&body.user.to_string()) {
-    //     return Err(APIError::BadRequestMsg("user already exists".to_string()));
-    // }
+    match res {
+        Ok(user_db) => Ok(Json(user_db.to_user_read())),
 
-    // let encrypted = vec![1, 1, 1, 1, 1, 1];
+        Err(DBError::Diesel(DatabaseError(UniqueViolation, _))) => {
+            Err(APIError::BadRequestMsg("email taken".to_string()))
+        }
 
-    // users.insert(body.user, encrypted);
+        Err(err) => Err(APIError::InternalLog(err.to_string())),
+    }
+}
 
-    // Ok(Json(GenericAPIResponse {
-    //     result: "ok".to_string(),
-    // }))
+fn hash_password(clear: String) -> String {
+    let salt = SaltString::generate(&mut OsRng);
+    let argon2 = Argon2::default();
+
+    let hash = argon2
+        .hash_password(clear.as_bytes(), &salt)
+        .expect("password hash failed");
+
+    hash.to_string()
 }
 
 async fn authenticate(

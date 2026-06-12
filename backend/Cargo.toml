@@ -25,3 +25,7 @@ tryphon = "0.2.0"
 rstest = "0.26.1"
 deadpool-diesel = { version = "0.6.1", features = ["postgres"] }
 diesel_migrations = "2.3.2"
+anyhow = "1.0.102"
+rand = "0.10.1"
+argon2 = { version = "0.5.3", features = ["std"] }
+thiserror = "2.0.18"

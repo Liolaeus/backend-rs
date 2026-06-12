@@ -12,7 +12,6 @@ use crate::{
     config::load_config,
     controllers::*,
     domain::state::AppState,
-    models::users::{UserDB, create_user},
 };
 
 pub async fn serve() {
@@ -27,18 +26,6 @@ pub async fn serve() {
 
     // migrate DB
     migrate_db(state.db.clone()).await;
-
-    let res = create_user(
-        &state.db,
-        UserDB {
-            name: "test".to_string(),
-            email: "fjsl@flsd.com".to_string(),
-        },
-    )
-    .await
-    .unwrap();
-
-    println!("{:?}", res.email);
 
     init_server(state)
         .await

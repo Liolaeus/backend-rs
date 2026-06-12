@@ -1,3 +1,5 @@
+use core::fmt;
+
 use axum::{
     Json,
     http::{self, StatusCode},
@@ -45,3 +47,24 @@ impl IntoResponse for APIError {
         }
     }
 }
+
+impl fmt::Display for APIError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            APIError::BadRequest => write!(f, "bad request"),
+            APIError::Unauthorized => write!(f, "unauthorized"),
+            APIError::BadRequestMsg(msg) => write!(f, "bad request: {}", msg),
+            APIError::InternalLog(msg) => {
+                // todo: proper logging
+                // println!("{:?}", msg);
+                write!(f, "internal server error: {}", msg)
+            }
+
+            APIError::JSONMessage(_, msg) => {
+                // writeln!(f, "{:?}", msg);
+                write!(f, "message: {}", msg)
+            }
+        }
+    }
+}
+impl std::error::Error for APIError {}
