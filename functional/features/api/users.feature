@@ -1,28 +1,44 @@
-# Feature: Users API
-#     Validate behavior of the Users endpoints
+@api @users
+Feature: Users API
 
-#   Background:
-#     Given I restart the backend
+    Background:
+        Given I restart the backend
 
-#   Scenario Outline: Register rejects invalid user payloads
-#     Given I set auth register payload user "<user>" and secret "<secret>"
-#     When I send a "PUT" request to "/totp/register"
-#     Then the response code is "400"
-#     And the response body contains "user"
+    Scenario Outline: Register rejects invalid user payloads
+        When I send a "POST" request to "/users" with body
+            """
+            {
+                "name": "<user>",
+                "email": "<email>",
+                "password": "<password>"
+            }
+            """
+        Then the response code is "400"
 
-#     Examples:
-#       | user | secret   |
-#       | aa   | abcdef12 |
-#       | !!!  | abcdef12 |
+        Examples:
+            | user     | email         | password |
+            | aa       | test@mail.com | abcdef12 |
+            | username | testmail.com  | abcdef12 |
+            | username | test@mail.com | flop     |
 
 
-#   Scenario: Register same email twice
-#     Given I set auth register payload user "<user>" and secret "<secret>"
-#     When I send a "PUT" request to "/totp/register"
-#     Then the response code is "400"
-#     And the response body contains "user"
-
-#     Examples:
-#       | user | secret   |
-#       | aa   | abcdef12 |
-#       | !!!  | abcdef12 |
+    Scenario: Register same email twice fails
+        And I send a "POST" request to "/users" with body
+            """
+            {
+                "name": "user",
+                "email": "user@email.com",
+                "password": "flop1234"
+            }
+            """
+        And the response code is "201"
+        And I send a "POST" request to "/users" with body
+            """
+            {
+                "name": "user",
+                "email": "user@email.com",
+                "password": "flop1234"
+            }
+            """
+        Then the response code is "400"
+        And the response body contains "email taken"

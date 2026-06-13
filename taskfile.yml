@@ -4,6 +4,29 @@ vars:
   DOCKER_NETWORK: dev
 
 tasks:
+
+  db:
+    decs: restart db
+    cmds:
+      - task --dir ./database run
+
+  back:
+    decs: compile & run backend locally
+    cmds:
+      - task --dir ./backend localrun
+
+  func:
+    decs: run functional tests
+    cmds:
+      - task --dir ./functional run
+
+  fmt:
+    decs: format all
+    cmds:
+      - task --dir ./functional format
+      - task --dir ./backend format
+
+# template tasks
   build:
     cmds:
       - docker build
@@ -43,14 +66,6 @@ tasks:
         ignore_error: true
     preconditions:
       - command -v docker
-
-  db:
-    cmds:
-      - task --dir ./database run
-
-  back:
-    cmds:
-      - task --dir ./backend localrun
 
   lint:
     cmds:

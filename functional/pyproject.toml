@@ -1,0 +1,10 @@
+[project]
+name = "functional"
+version = "0.1.0"
+description = "fuctional tests for backend-rs"
+requires-python = ">=3.10"
+dependencies = [
+    "behave>=1.3.3",
+    "requests>=2.34.2",
+    "ruff>=0.15.17",
+]

@@ -1,8 +1,6 @@
 import os
 import subprocess
 from pathlib import Path
-from sys import stderr
-import time
 
 from behave import given, then, when
 
@@ -14,12 +12,6 @@ def step_unset_env_var(context, name):
     context.launch_env.pop(name, None)
 
 
-@given('the environment variable "" is unset')
-def step_unset_env_var(context):
-    if not hasattr(context, "launch_env"):
-        context.launch_env = os.environ.copy()
-
-
 @given('the environment variable "{name}" is set to "{value}"')
 def step_set_env_var(context, name, value):
     if not hasattr(context, "launch_env"):
@@ -29,7 +21,7 @@ def step_set_env_var(context, name, value):
 
 @when("I start the backend")
 def step_start_backend(context):
-    backend_root = Path(__file__).resolve().parents[2]
+    backend_root = Path(__file__).resolve().parents[2] / "backend"
     subprocess.run(["pkill", "backend"])
 
     proc = subprocess.Popen(
@@ -68,4 +60,6 @@ def step_startup_succeeds(context):
 
 @then('stderr contains "{snippet}"')
 def step_stderr_contains(context, snippet):
-    assert snippet in context.stderr, f"expected '{snippet}' in stderr '{context.stderr}'"
+    assert snippet in context.stderr, (
+        f"expected '{snippet}' in stderr '{context.stderr}'"
+    )

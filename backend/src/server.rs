@@ -42,7 +42,7 @@ async fn init_server(state: AppState) -> Result<(), Error> {
 
     let api_routes = Router::new()
         .merge(calculator::calc_routes())
-        .merge(auth::auth_routes())
+        .merge(users::auth_routes())
         .merge(shop::shop_routes())
         .layer(TraceLayer::new_for_http())
         .with_state(state);

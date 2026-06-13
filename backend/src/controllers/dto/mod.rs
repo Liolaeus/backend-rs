@@ -5,6 +5,6 @@ pub mod users;
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
-pub struct GenericAPIResponse {
+pub struct APIResponse {
     pub result: String,
 }

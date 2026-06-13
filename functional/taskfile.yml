@@ -1,0 +1,19 @@
+version: "3"
+
+tasks:
+  run:
+    desc: Run functional tests.
+    cmds:
+      - uv run behave --stop --format progress3 {{.CLI_ARGS}}
+    preconditions:
+      - test -n uv
+      - test -n behave
+
+
+  format:
+    desc: Format python code with Ruff.
+    cmds:
+      - uv run ruff format .
+      - uv run ruff check . --fix
+    preconditions:
+      - test -n uv

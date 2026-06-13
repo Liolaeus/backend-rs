@@ -5,8 +5,8 @@ use argon2::{
 use axum::{
     Json, Router,
     extract::State,
-    http::HeaderMap,
-    routing::{post, put},
+    http::{HeaderMap, StatusCode},
+    routing::post,
 };
 use diesel::result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError};
 use validator::Validate;
@@ -14,7 +14,7 @@ use validator::Validate;
 use crate::{
     controllers::{
         dto::{
-            GenericAPIResponse,
+            APIResponse,
             users::{AuthUserQuery, UserRead, UserWrite},
         },
         errors::APIError,
@@ -25,14 +25,14 @@ use crate::{
 
 pub fn auth_routes() -> Router<AppState> {
     Router::new()
-        .route("/totp/register", put(register))
+        .route("/users", post(create_users))
         .route("/totp/auth", post(authenticate))
 }
 
-async fn register(
+async fn create_users(
     State(state): State<AppState>,
     Json(body): Json<UserWrite>,
-) -> Result<Json<UserRead>, APIError> {
+) -> Result<(StatusCode, Json<UserRead>), APIError> {
     if let Err(e) = body.validate() {
         return Err(APIError::BadRequestMsg(e.to_string()));
     }
@@ -48,7 +48,7 @@ async fn register(
     .await;
 
     match res {
-        Ok(user_db) => Ok(Json(user_db.to_user_read())),
+        Ok(user_db) => Ok((StatusCode::CREATED, Json(user_db.to_user_read()))),
 
         Err(DBError::Diesel(DatabaseError(UniqueViolation, _))) => {
             Err(APIError::BadRequestMsg("email taken".to_string()))
@@ -73,7 +73,7 @@ async fn authenticate(
     State(_state): State<AppState>,
     _headers: HeaderMap,
     Json(_body): Json<AuthUserQuery>,
-) -> Result<Json<GenericAPIResponse>, APIError> {
+) -> Result<Json<APIResponse>, APIError> {
     // if let Err(e) = body.validate() {
     //     return Err(APIError::BadRequestMsg(e.to_string()));
     // }

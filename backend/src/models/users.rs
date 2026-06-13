@@ -47,7 +47,7 @@ pub async fn read_user(pool: &Pool, email: String) -> Result<UserDB, DBError> {
     let db = pool.get().await.unwrap();
 
     let res = db
-        .interact(move |db| {
+        .interact(|db| {
             users::table
                 .filter(users::email.eq(email))
                 .select(UserDB::as_select())
