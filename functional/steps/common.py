@@ -45,6 +45,19 @@ def step_send_request_with_body(context, method, path):
     step_send_request(context, method, path)
 
 
+@step('I send a "{method}" request to "{path}" with query parameters')
+def step_send_request_with_query_params(context, method, path):
+    params = {row[0]: row[1] for row in context.table}
+    url = f"{context.base_url}{path}"
+    context.response = requests.request(
+        method=method,
+        url=url,
+        headers=context.request_headers,
+        params=params,
+        timeout=5,
+    )
+
+
 @step('the response code is "{status_code}"')
 def step_assert_status_code(context, status_code):
     assert context.response is not None, "no response captured"

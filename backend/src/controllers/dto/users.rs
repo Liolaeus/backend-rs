@@ -3,6 +3,10 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
+use crate::controllers::dto::base::{PaginatedQuery, PaginatedResponse};
+
+pub type PaginatedUsers = PaginatedResponse<UserRead>;
+
 // match 4-16 long alphanumerical uersernames
 static USERNAME: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[a-zA-Z0-9]{4,16}$").unwrap());
 // match 8-64 long alphanumerical passwords
@@ -30,4 +34,16 @@ pub struct UserRead {
 pub struct AuthUserQuery {
     #[validate(regex(path=*PASSWORD))]
     pub password: String,
+}
+
+// fn validate_users_sort_by(sort_by: &Vec<String>) -> Result<(), ValidationError> {
+//     validate_against_list(sort_by, &["name", "email"])
+// }
+
+#[derive(Debug, Deserialize, Validate)]
+pub struct PaginatedUserQuery {
+    #[serde(flatten)]
+    pub base: PaginatedQuery,
+    // #[validate(custom(function = "validate_users_sort_by"))]
+    // pub sort_by: Vec<String>,
 }

@@ -6,7 +6,7 @@ use axum::{
     Json, Router,
     extract::State,
     http::{HeaderMap, StatusCode},
-    routing::post,
+    routing::{get, post},
 };
 use diesel::result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError};
 use validator::Validate;
@@ -15,17 +15,18 @@ use crate::{
     controllers::{
         dto::{
             APIResponse,
-            users::{AuthUserQuery, UserRead, UserWrite},
+            users::{AuthUserQuery, PaginatedUserQuery, PaginatedUsers, UserRead, UserWrite},
         },
         errors::APIError,
     },
     domain::state::AppState,
-    models::users::{DBError, UserDB, create_user},
+    models::users::{DBError, UserDB, create_user, get_users},
 };
 
 pub fn auth_routes() -> Router<AppState> {
     Router::new()
         .route("/users", post(create_users))
+        .route("/users", get(read_users))
         .route("/totp/auth", post(authenticate))
 }
 
@@ -53,6 +54,32 @@ async fn create_users(
         Err(DBError::Diesel(DatabaseError(UniqueViolation, _))) => {
             Err(APIError::BadRequestMsg("email taken".to_string()))
         }
+
+        Err(err) => Err(APIError::InternalLog(err.to_string())),
+    }
+}
+
+async fn read_users(
+    State(state): State<AppState>,
+    Json(query): Json<PaginatedUserQuery>,
+) -> Result<(StatusCode, Json<PaginatedUsers>), APIError> {
+    if let Err(e) = query.validate() {
+        return Err(APIError::BadRequestMsg(e.to_string()));
+    }
+
+    let res = get_users(&state.db, &query).await;
+
+    match res {
+        Ok((users_db, total, page_elts)) => Ok((
+            StatusCode::OK,
+            Json(PaginatedUsers {
+                page: query.base.page,
+                page_size: query.base.page_size,
+                total,
+                page_elts,
+                data: users_db.into_iter().map(|u| u.to_user_read()).collect(),
+            }),
+        )),
 
         Err(err) => Err(APIError::InternalLog(err.to_string())),
     }

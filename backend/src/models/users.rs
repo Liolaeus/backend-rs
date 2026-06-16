@@ -1,14 +1,15 @@
 use anyhow::Result;
 use deadpool_diesel::{InteractError, postgres::Pool};
 use diesel::{
-    ExpressionMethods, RunQueryDsl, Selectable, SelectableHelper,
-    deserialize::Queryable,
-    prelude::Insertable,
-    query_dsl::methods::{FilterDsl, SelectDsl},
+    Connection, QueryDsl, RunQueryDsl, Selectable, SelectableHelper,
+    deserialize::Queryable, prelude::Insertable,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{controllers::dto::users::UserRead, schema::users};
+use crate::{
+    controllers::dto::users::{PaginatedUserQuery, UserRead},
+    schema::users,
+};
 
 #[derive(Serialize, Queryable, Selectable, Deserialize, Insertable)]
 #[diesel(table_name = users)]
@@ -43,19 +44,38 @@ pub async fn create_user(pool: &Pool, new_user: UserDB) -> Result<UserDB, DBErro
     Ok(res)
 }
 
-pub async fn read_user(pool: &Pool, email: String) -> Result<UserDB, DBError> {
+pub async fn get_users(
+    pool: &Pool,
+    query: &PaginatedUserQuery,
+) -> Result<(Vec<UserDB>, i64, i64), DBError> {
     let db = pool.get().await.unwrap();
 
-    let res = db
-        .interact(|db| {
-            users::table
-                .filter(users::email.eq(email))
-                .select(UserDB::as_select())
-                .get_result(db)
+    let offset = (query.base.page - 1) as i64 * query.base.page_size as i64;
+    let limit = query.base.page_size as i64;
+
+    let (users, total, page_elts) = db
+        .interact(move |db| {
+            db.transaction::<_, diesel::result::Error, _>(|db| {
+                let total = users::table.count().get_result(db)?;
+
+                let res = users::table
+                    .offset(offset)
+                    .limit(limit)
+                    .select(UserDB::as_select())
+                    .get_results(db);
+
+                match res {
+                    Ok(users) => {
+                        let page_elts = users.len() as i64;
+                        Ok((users, total, page_elts))
+                    }
+                    Err(e) => Err(e),
+                }
+            })
         })
         .await??;
 
-    Ok(res)
+    Ok((users, total, page_elts))
 }
 
 #[derive(Debug, thiserror::Error)]
