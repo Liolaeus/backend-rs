@@ -7,7 +7,7 @@ edition = "2024"
 strip = true
 
 [dependencies]
-diesel = { version = "2.2.0", features = ["postgres"] }
+diesel = { version = "2.2.0", features = ["postgres", "uuid"] }
 
 axum = "0.8.8"
 serde = { version = "1.0.228", features = ["derive"] }
@@ -29,3 +29,5 @@ anyhow = "1.0.102"
 rand = "0.10.1"
 argon2 = { version = "0.5.3", features = ["std"] }
 thiserror = "2.0.18"
+uuid = { version = "1.23.3", features = ["v4", "serde"] }
+timelog = "1.0.7"

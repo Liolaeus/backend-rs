@@ -8,20 +8,10 @@ import requests
 
 
 def before_all(context):
+    subprocess.run(["pkill", "backend"])
     context.backend = init_backend()
     context.backend.build()
     context.base_url = context.backend.base_url
-
-
-def after_all(context):
-    subprocess.run(
-        ["pkill", "backend"],
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        timeout=1,
-    )
 
 
 def before_scenario(context, scenario):

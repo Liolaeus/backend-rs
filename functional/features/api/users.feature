@@ -2,7 +2,7 @@
 Feature: Users API
 
     Background:
-        Given I restart the backend
+        Given a clean install
 
     Scenario Outline: Register rejects invalid user payloads
         When I send a "POST" request to "/users" with body
@@ -45,17 +45,17 @@ Feature: Users API
 
 
     Scenario: List users with pagination
-        Given I create "20" users
+        Given I create "6" users
         And I send a "GET" request to "/users" with query parameters
-            | page      | 1 |
-            | page_size | 3 |
+            | page | page_size |
+            | 1    | 3         |
         Then the response code is "200"
-        And the response json equals
+        And the response contains
             """
             {
                 "page": 1,
                 "page_size": 3,
-                "total": 20,
+                "total": 6,
                 "page_elts": 3,
                 "data": [
                     {
@@ -76,38 +76,30 @@ Feature: Users API
 
 
     Scenario: List a later page of users
-        Given I create "20" users
+        Given I create "6" users
         And I send a "GET" request to "/users" with query parameters
-            | page      | 2 |
-            | page_size | 5 |
+            | page | page_size |
+            | 2    | 3         |
         Then the response code is "200"
-        And the response json equals
+        And the response contains
             """
             {
                 "page": 2,
-                "page_size": 5,
-                "total": 20,
-                "page_elts": 5,
+                "page_size": 3,
+                "total": 6,
+                "page_elts": 3,
                 "data": [
+                    {
+                        "name": "user3",
+                        "email": "user3@mail.com"
+                    },
+                    {
+                        "name": "user4",
+                        "email": "user4@mail.com"
+                    },
                     {
                         "name": "user5",
                         "email": "user5@mail.com"
-                    },
-                    {
-                        "name": "user6",
-                        "email": "user6@mail.com"
-                    },
-                    {
-                        "name": "user7",
-                        "email": "user7@mail.com"
-                    },
-                    {
-                        "name": "user8",
-                        "email": "user8@mail.com"
-                    },
-                    {
-                        "name": "user9",
-                        "email": "user9@mail.com"
                     }
                 ]
             }
@@ -117,17 +109,17 @@ Feature: Users API
     Scenario: List users with invalid pagination rejects the request
         Given I create "3" users
         And I send a "GET" request to "/users" with query parameters
-            | page      | 0 |
-            | page_size | 5 |
+            | page | page_size |
+            | 0    | 5         |
         Then the response code is "400"
 
 
     Scenario: List users when none exist
         And I send a "GET" request to "/users" with query parameters
-            | page      | 1 |
-            | page_size | 5 |
+            | page | page_size |
+            | 1    | 5         |
         Then the response code is "200"
-        And the response json equals
+        And the response contains
             """
             {
                 "page": 1,
@@ -137,3 +129,11 @@ Feature: Users API
                 "data": []
             }
             """
+
+    Scenario: Delete a user
+        Given I create "1" users
+        And user "user0@mail.com" exists
+
+        When I delete user "user0@mail.com"
+
+        Then user "user0@mail.com" does not exist

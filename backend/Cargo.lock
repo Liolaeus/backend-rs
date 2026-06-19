@@ -132,11 +132,13 @@ dependencies = [
  "serde_json",
  "sha256",
  "thiserror",
+ "timelog",
  "tokio",
  "tower-http",
  "tracing",
  "tracing-subscriber",
  "tryphon",
+ "uuid",
  "validator",
 ]
 
@@ -385,6 +387,7 @@ dependencies = [
  "downcast-rs",
  "itoa",
  "pq-sys",
+ "uuid",
 ]
 
 [[package]]
@@ -1507,6 +1510,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "timelog"
+version = "1.0.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ab006a6038a09d1766ab01da5c33c67ab522e398d6a3b798127fa91f73a583f"
+dependencies = [
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
 name = "tinystr"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1772,6 +1785,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
 
 [[package]]
+name = "uuid"
+version = "1.23.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "144d6b123cef80b301b8f72a9e2ca4370ddec21950d0a103dd22c437006d2db7"
+dependencies = [
+ "getrandom 0.4.2",
+ "js-sys",
+ "serde_core",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "validator"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1920,6 +1945,16 @@ dependencies = [
  "hashbrown 0.15.5",
  "indexmap",
  "semver",
+]
+
+[[package]]
+name = "web-sys"
+version = "0.3.100"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e0871acf327f283dc6da28a1696cdc64fb355ba9f935d052021fa77f35cce69"
+dependencies = [
+ "js-sys",
+ "wasm-bindgen",
 ]
 
 [[package]]

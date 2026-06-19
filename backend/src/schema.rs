@@ -1,15 +1,15 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    articles (id) {
-        id -> Int4,
+    articles (uuid) {
+        uuid -> Uuid,
         stock -> Int4,
     }
 }
 
 diesel::table! {
-    users (id) {
-        id -> Int4,
+    users (uuid) {
+        uuid -> Uuid,
         name -> Varchar,
         email -> Varchar,
         password_hash -> VarChar,

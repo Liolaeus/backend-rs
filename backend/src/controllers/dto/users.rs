@@ -1,9 +1,10 @@
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 use validator::Validate;
 
-use crate::controllers::dto::base::{PaginatedQuery, PaginatedResponse};
+use crate::controllers::dto::base::PaginatedResponse;
 
 pub type PaginatedUsers = PaginatedResponse<UserRead>;
 
@@ -26,24 +27,7 @@ pub struct UserWrite {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UserRead {
+    pub uuid: Uuid,
     pub name: String,
     pub email: String,
-}
-
-#[derive(Debug, Deserialize, Validate)]
-pub struct AuthUserQuery {
-    #[validate(regex(path=*PASSWORD))]
-    pub password: String,
-}
-
-// fn validate_users_sort_by(sort_by: &Vec<String>) -> Result<(), ValidationError> {
-//     validate_against_list(sort_by, &["name", "email"])
-// }
-
-#[derive(Debug, Deserialize, Validate)]
-pub struct PaginatedUserQuery {
-    #[serde(flatten)]
-    pub base: PaginatedQuery,
-    // #[validate(custom(function = "validate_users_sort_by"))]
-    // pub sort_by: Vec<String>,
 }
